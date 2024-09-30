@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Form</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Verdana', sans-serif;
+      background-color: #282c34;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .form-container {
+      background-color: #ffffff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+      width: 400px;
+    }
+    h2 {
+      text-align: center;
+      color: #282c34;
+      margin-bottom: 25px;
+    }
+    .form-group {
+      margin-bottom: 18px;
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      color: #555;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 15px;
+      background-color: #f9f9f9;
+    }
+    input:focus, textarea:focus {
+      border-color: #61dafb;
+      background-color: #fff;
+      outline: none;
+    }
+    .error {
+      color: red;
+      font-size: 13px;
+      display: none;
+      margin-top: 5px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #61dafb;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      margin: 5px;
+    }
+    button:hover {
+      background-color: #21a1f1;
+    }
+    .btn{
+      background-color: #282c34;
+    }
+    a{
+      text-decoration: none;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="form-container">
+    <h2>Contact Us</h2>
+    <form id="contactForm">
+      <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" id="name" placeholder="Enter your name">
+        <small class="error" id="nameError">Name must be at least 8 characters long and contain no numbers</small>
+      </div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="Enter your email">
+        <small class="error" id="emailError">Please enter a valid email</small>
+      </div>
+      <div class="form-group">
+        <label for="message">Message</label>
+        <textarea id="message" rows="4" placeholder="Your message"></textarea>
+        <small class="error" id="messageError">Message is required</small>
+      </div>
+      <button type="submit">Submit</button>
+  <button class="btn"><a href="dashboard.html">Want to see dashboard?</a></button>
+    </form>
+  </div>
+
+  <script>
+
+
+function deleteUser(userId) {
+  fetch(`https://66f78628b5d85f31a342e418.mockapi.io/form-data/data/${userId}`, {
+    method: 'DELETE'
+  })
+    .then(response => {
+      if (response.ok) {
+        console.log(`User with ID ${userId} deleted`);
+      } else {
+        console.error('Failed to delete user');
+      }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+
+
+    const form = document.getElementById('contactForm');
+    const nameInput = document.getElementById('name');
+    const emailInput = document.getElementById('email');
+    const messageInput = document.getElementById('message');
+    const nameError = document.getElementById('nameError');
+    const emailError = document.getElementById('emailError');
+    const messageError = document.getElementById('messageError');
+
+    form.addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      let isValid = true;
+
+      // Name validation
+
+      if(nameInput.value.trim() === ''){
+       nameError.innerText="name is required"
+       nameError.style.display = 'block';
+        isValid = false;
+      }
+      const namePattern = /^[a-zA-Z\s]{8,}$/; // At least 8 letters, no numbers allowed
+      if (!namePattern.test(nameInput.value)) {
+        nameError.style.display = 'block';
+        isValid = false;
+      } else {
+        nameError.style.display = 'none';
+      }
+
+      // Email validation
+
+      if(emailInput.value.trim() === ''){
+        emailError.innerText="Email is required"
+        emailError.style.display = 'block';
+        isValid = false;
+      }
+      const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if (!emailPattern.test(emailInput.value)) {
+        emailError.style.display = 'block';
+        isValid = false;
+      } else {
+        emailError.style.display = 'none';
+      }
+
+      // Message validation
+      if (messageInput.value.trim() === '') {
+        messageError.style.display = 'block';
+        isValid = false;
+      } else {
+        messageError.style.display = 'none';
+      }
+
+      // If all validations pass
+      if (isValid) {
+        const formData = {
+          name: nameInput.value,
+          email: emailInput.value,
+          message: messageInput.value
+        };
+
+        // Send the data to the API
+        fetch('https://66f78628b5d85f31a342e418.mockapi.io/form-data/data', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify(formData) // Send the form data
+})
+.then(response => response.json())
+.then(data => {
+  // Instead of checking for 'data.success', check if 'data' contains the expected result
+  if (data.id) { // If data contains an id, the submission was successful //  mockapi defaultly creates id for each data submitted so if it  contains id then data is stored perfectly in api //
+    alert('Form Submitted Successfully!');
+    form.reset();
+  } else {
+    alert('Failed to submit the form. Please try again.');
+  }
+})
+.catch(error => {
+  console.error('Error:', error);
+  alert('There was an error submitting the form.');
+});
+
+      }
+    });
+   
+  </script>
+
+</body>
+</html>
